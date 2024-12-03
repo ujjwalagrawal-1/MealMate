@@ -56,13 +56,13 @@ const register = async (req, res) => {
 
 const login = async (req, res) => {
   try {
-    const { email, password } = req.body;
-    // validate
+    const { email, password, rememberMe } = req.body; // Get the rememberMe value from the request body
+    console.log(req.body);
+    // Validate fields
     if (!email || !password)
       return res.status(400).json({ msg: "Not all fields have been entered." });
 
     const admin = await Admin.findOne({ email: email });
-    // console.log(admin);
     if (!admin)
       return res.status(400).json({
         success: false,
@@ -78,9 +78,14 @@ const login = async (req, res) => {
         message: "Invalid credentials.",
       });
 
+    // Set token expiration time based on Remember Me
+    const expirationTime = rememberMe
+      ? Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7 // 7 days
+      : Math.floor(Date.now() / 1000) + 60 * 60 * 24;   // 24 hours
+
     const token = jwt.sign(
       {
-        exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24,
+        exp: expirationTime,
         id: admin._id,
       },
       process.env.JWT_SECRET
@@ -89,9 +94,7 @@ const login = async (req, res) => {
     const result = await Admin.findOneAndUpdate(
       { _id: admin._id },
       { isLoggedIn: true },
-      {
-        new: true,
-      }
+      { new: true }
     ).exec();
 
     res
@@ -105,16 +108,15 @@ const login = async (req, res) => {
             name: result.name,
             isLoggedIn: result.isLoggedIn,
           },
+          userRole: "admin",
         },
         message: "Successfully login admin",
       });
   } catch (err) {
-    // res.status(500).json({ success: false, result:null, message: err.message });
-    res
-      .status(500)
-      .json({ success: false, result: null, message: err.message });
+    res.status(500).json({ success: false, result: null, message: err.message });
   }
 };
+
 
 const isValidToken = async (req, res, next) => {
   try {
