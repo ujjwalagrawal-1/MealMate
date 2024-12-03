@@ -1,4 +1,3 @@
-
 import dotenv from "dotenv"
 import {ConnectDB} from "./config/db.js"
 import { app,port } from './app.js';

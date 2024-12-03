@@ -3,6 +3,8 @@ import cors from 'cors';
 import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
 
+//Routers imports
+import authRouter from './routes/authRoutes.js';
 // Initialize express app
 const app = express();
 const port = process.env.PORT || 3000;
@@ -24,5 +26,10 @@ app.use(express.static("public"));
 // app.use("/api/v1/users", );
 // app.use("/api/v1/products", );
 // app.use("/api/v1/orders", );
+app.get("/", function (req,res) {
+    console.log("check")
+    res.sendStatus(200)
+})
+app.use("/api/admin", authRouter)
 
 export { app, port };
