@@ -1,7 +1,7 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
-import Admin from '../models/Admin.js';
+import Admin from "../models/Admin.js";
 import dotenv from "dotenv";
 dotenv.config({ path: ".variables.env" });
 
@@ -94,18 +94,20 @@ const login = async (req, res) => {
       }
     ).exec();
 
-    res.json({
-      success: true,
-      result: {
-        token,
-        admin: {
-          id: result._id,
-          name: result.name,
-          isLoggedIn: result.isLoggedIn,
+    res
+      .header("x-auth-token", token)
+      .status(200)
+      .json({
+        success: true,
+        result: {
+          admin: {
+            id: result._id,
+            name: result.name,
+            isLoggedIn: result.isLoggedIn,
+          },
         },
-      },
-      message: "Successfully login admin",
-    });
+        message: "Successfully login admin",
+      });
   } catch (err) {
     // res.status(500).json({ success: false, result:null, message: err.message });
     res
@@ -177,4 +179,4 @@ const logout = async (req, res) => {
   res.status(200).json({ isLoggedIn: result.isLoggedIn });
 };
 
-export {logout,register, isValidToken, login};
+export { logout, register, isValidToken, login };
