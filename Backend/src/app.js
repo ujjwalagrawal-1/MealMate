@@ -5,6 +5,8 @@ import cookieParser from 'cookie-parser';
 
 //Routers imports
 import authRouter from './routes/authRoutes.js';
+import messRouter from './routes/messRoutes.js';
+
 // Initialize express app
 const app = express();
 const port = process.env.PORT || 3000;
@@ -31,5 +33,5 @@ app.get("/", function (req,res) {
     res.sendStatus(200)
 })
 app.use("/api/admin", authRouter)
-
+app.use("/api/mess", messRouter)
 export { app, port };
