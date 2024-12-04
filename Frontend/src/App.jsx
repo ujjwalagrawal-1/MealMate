@@ -1,18 +1,20 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import AdminLoginPage from "./pages/AdminLoginPage";
-import MessDetailsPage from "./pages/MessDetailsPage";
+import MessPage from "./pages/MessDetailsPage";
 import AdminProtectedRoute from "./Auth/AdminProtectedRoute"; // Import the Protected Route
-
+import { MessProvider } from "./context/MessContext";
 function App() {
   return (
     <Router>
       <Routes>
         {/* Protected Route for MessDetailsPage */}
-        <Route 
-          path="/home" 
+        <Route
+          path="/mess"
           element={
             <AdminProtectedRoute>
-              <MessDetailsPage />
+              <MessProvider>
+                <MessPage />
+              </MessProvider>
             </AdminProtectedRoute>
           }
         />

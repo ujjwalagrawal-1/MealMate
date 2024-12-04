@@ -1,7 +1,8 @@
 import React from "react";
 import axios from "axios";
-
+import { useNavigate } from "react-router-dom";
 const AdminLoginPage = () => {
+  const navigate = useNavigate();
   const handleSubmit = async (e) => {
     e.preventDefault();
     const [email, password, rememberMe] = e.target.elements;
@@ -22,7 +23,8 @@ const AdminLoginPage = () => {
           localStorage.setItem("userRole", "admin"); // Store the user role
         }
 
-        alert("Login successful!");
+        navigate("/mess");
+
       } else {
         alert("Login failed: No token received.");
       }

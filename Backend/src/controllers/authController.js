@@ -81,7 +81,7 @@ const login = async (req, res) => {
     // Set token expiration time based on Remember Me
     const expirationTime = rememberMe
       ? Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7 // 7 days
-      : Math.floor(Date.now() / 1000) + 60 * 60 * 24;   // 24 hours
+      : Math.floor(Date.now() / 1000) + 60 * 60 * 24; // 24 hours
 
     const token = jwt.sign(
       {
@@ -113,10 +113,11 @@ const login = async (req, res) => {
         message: "Successfully login admin",
       });
   } catch (err) {
-    res.status(500).json({ success: false, result: null, message: err.message });
+    res
+      .status(500)
+      .json({ success: false, result: null, message: err.message });
   }
 };
-
 
 const isValidToken = async (req, res, next) => {
   try {
@@ -156,7 +157,6 @@ const isValidToken = async (req, res, next) => {
       });
     else {
       req.admin = admin;
-      // console.log(req.admin);
       next();
     }
   } catch (err) {

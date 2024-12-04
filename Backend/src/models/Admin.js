@@ -35,6 +35,7 @@ const AdminSchema = new mongoose.Schema({
   isLoggedIn: {
     type: Boolean,
   },
+  mess: [{ type: mongoose.Schema.Types.ObjectId, ref: "Mess" }],
 });
 
 // generating a hash
