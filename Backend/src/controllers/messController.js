@@ -110,4 +110,78 @@ const getMess = async (req, res) => {
   }
 };
 
-export { createMess, getMess };
+const getMessById = async (req, res) => {
+  try {
+    // Extract mess ID from the route parameter
+    const { id } = req.params;
+
+    // Find the mess by ID
+    const mess = await Mess.findById(id)
+    if (!mess) {
+      return res.status(404).json({ error: "Mess not found." });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Mess details retrieved successfully.",
+      mess,
+    });
+  } catch (err) {
+    console.error("Error fetching mess details:", err.message);
+    res.status(500).json({ error: "Internal server error." });
+  }
+};
+
+const setMessActive = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Find and update the mess to set it as active
+    const mess = await Mess.findByIdAndUpdate(
+      id,
+      { isActive: true },
+      { new: true }
+    );
+
+    if (!mess) {
+      return res.status(404).json({ error: "Mess not found." });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Mess set to active successfully.",
+      mess,
+    });
+  } catch (err) {
+    console.error("Error setting mess to active:", err.message);
+    res.status(500).json({ error: "Internal server error." });
+  }
+};
+
+const setMessInactive = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Find and update the mess to set it as inactive
+    const mess = await Mess.findByIdAndUpdate(
+      id,
+      { isActive: false },
+      { new: true }
+    );
+
+    if (!mess) {
+      return res.status(404).json({ error: "Mess not found." });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Mess set to inactive successfully.",
+      mess,
+    });
+  } catch (err) {
+    console.error("Error setting mess to inactive:", err.message);
+    res.status(500).json({ error: "Internal server error." });
+  }
+};
+
+export { createMess, getMess, getMessById, setMessActive, setMessInactive};

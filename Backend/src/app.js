@@ -10,6 +10,7 @@ dotenv.config({
 //Routers imports
 import authRouter from './routes/authRoutes.js';
 import messRouter from './routes/messRoutes.js';
+import attendanceRouter from './routes/attendanceRoutes.js';
 
 // Initialize express app
 const app = express();
@@ -38,6 +39,8 @@ app.get("/", function (req,res) {
     console.log("check")
     res.sendStatus(200)
 })
+
 app.use("/api/admin", authRouter)
 app.use("/api/mess", messRouter)
+app.use("/api/attendance", attendanceRouter)
 export { app, port };
