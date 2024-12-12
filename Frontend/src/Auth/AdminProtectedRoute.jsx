@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
-const AdminProtectedRoute = ({ children }) => {
+AdminProtectedRoute = ({ children }) => {
   const navigate = useNavigate();  // Replace useHistory with useNavigate
 
   useEffect(() => {
