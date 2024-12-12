@@ -12,6 +12,7 @@ import authRouter from './routes/Adminauth.Routes.js';
 import messRouter from './routes/messRoutes.js';
 import attendanceRouter from './routes/attendanceRoutes.js';
 import Studentroutes from './routes/Student.Routes.js';
+import messworkerroutes from './routes/Messworker.Routes.js';
 
 // Initialize express app
 const app = express();
@@ -36,6 +37,7 @@ app.get("/", function (req,res) {
     console.log("check")
     res.sendStatus(200)
 })
+app.use("/api/worker",messworkerroutes);
 app.use("/api/student",Studentroutes);
 app.use("/api/admin", authRouter)
 app.use("/api/mess", messRouter)

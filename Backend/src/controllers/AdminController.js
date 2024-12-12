@@ -279,4 +279,102 @@ const bulkDeleteStudents = async (req, res) => {
   }
 };
 
-export { logout, register, isValidToken, login  ,bulkUploadStudents , singleStudentUpload , bulkDeleteStudents};
+const bulkUploadMessWorkers = async (req, res) => {
+  try {
+    let messWorkers = [];
+    const response = await csv().fromFile(req.file.path);
+    for (let i = 0; i < response.length; i++) {
+      messWorkers.push({
+        name: response[i].name,
+        aadharNumber: response[i].aadharNumber,
+        mobileNumber: response[i].mobileNumber,
+        address: response[i].address,
+        adminId: req.admin._id,
+      });
+    }
+
+    const allWorkers = await MessWorker.insertMany(messWorkers);
+
+    if (!allWorkers) {
+      return res.status(402).json({
+        message: "Failed to upload the mess workers",
+      });
+    }
+
+    res.status(200).json({
+      message: "All the mess workers uploaded successfully.",
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Error during bulk upload.",
+      error: error.message,
+    });
+  }
+};
+
+// Single mess worker upload function
+const singleMessWorkerUpload = async (req, res) => {
+  try {
+    const { name, aadharNumber, mobileNumber, address } = req.body;
+
+    // Validate fields
+    if (!name || !aadharNumber || !mobileNumber || !address) {
+      return res.status(400).json({
+        message: "Please provide all the required fields",
+      });
+    }
+
+    const newMessWorker = new MessWorker({
+      name,
+      aadharNumber,
+      mobileNumber,
+      address,
+      adminId: req.admin._id,
+    });
+
+    const messWorker = await newMessWorker.save();
+
+    res.status(200).json({
+      message: "Mess worker data uploaded successfully!",
+      data: {
+        worker_id: messWorker._id,
+        name: messWorker.name,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Error during single mess worker upload.",
+      error: error.message,
+    });
+  }
+};
+
+const bulkDeleteMessWorkers = async (req, res) => {
+  try {
+
+    const workersToDelete = await csv().fromFile(req.file.path);
+    const mobileNumber = workersToDelete.map(worker => worker.mobileNumber);
+
+    const result = await MessWorker.deleteMany({
+      mobileNumber: { $in: mobileNumber },
+    });
+
+    if (result.deletedCount === 0) {
+      return res.status(404).json({
+        message: "No mess workers found to delete!",
+      });
+    }
+
+    res.status(200).json({
+      message: `${result.deletedCount} mess worker(s) deleted successfully!`,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Error during bulk delete.",
+      error: error.message,
+    });
+  }
+};
+export { logout, register, isValidToken, login  ,bulkUploadStudents , singleStudentUpload , bulkDeleteStudents , bulkUploadMessWorkers,
+  singleMessWorkerUpload,
+  bulkDeleteMessWorkers,};

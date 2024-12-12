@@ -20,3 +20,4 @@ const MessSchema = new mongoose.Schema({
 const Mess = mongoose.model("Mess", MessSchema);
 
 export default Mess;
+

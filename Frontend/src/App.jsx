@@ -3,7 +3,7 @@ import AdminLoginPage from "./pages/AdminLoginPage";
 import MessPage from "./pages/MessDetailsPage";
 import MessHomePage from "./pages/MessHomePage.jsx";
 import AdminProtectedRoute from "./Auth/AdminProtectedRoute"; // Import the Protected Route
-import { MessProvider } from "./context/MessContext";
+import { MessProvider } from "./context/messContext.jsx";
 function App() {
   return (
     <Router>

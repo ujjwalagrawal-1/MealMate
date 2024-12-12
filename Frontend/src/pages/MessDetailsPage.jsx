@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useMess } from "../context/MessContext";
+import { useMess } from "../context/messContext";
 import { Link } from "react-router-dom";
 
 const MessPage = () => {
