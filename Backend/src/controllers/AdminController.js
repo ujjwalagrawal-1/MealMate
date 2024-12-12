@@ -1,8 +1,9 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import mongoose from "mongoose";
 import Admin from "../models/Admin.js";
 import dotenv from "dotenv";
+import { Student } from "../models/Student.js";
+import csv from 'csvtojson'
 dotenv.config({ path: ".variables.env" });
 
 const register = async (req, res) => {
@@ -37,13 +38,15 @@ const register = async (req, res) => {
       surname,
     });
     const savedAdmin = await newAdmin.save();
-    res.status(200).send({
+    res.status(200)
+    .send({
       success: true,
+      message : "Admin Created Successfully!!",
       admin: {
         id: savedAdmin._id,
         name: savedAdmin.name,
         surname: savedAdmin.surname,
-      },
+      }
     });
   } catch (err) {
     res.status(500).json({
@@ -56,7 +59,7 @@ const register = async (req, res) => {
 
 const login = async (req, res) => {
   try {
-    const { email, password, rememberMe } = req.body; // Get the rememberMe value from the request body
+    const { email, password, rememberMe } = req.body; 
     console.log(req.body);
     // Validate fields
     if (!email || !password)
@@ -79,27 +82,22 @@ const login = async (req, res) => {
       });
 
     // Set token expiration time based on Remember Me
-    const expirationTime = rememberMe
-      ? Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7 // 7 days
-      : Math.floor(Date.now() / 1000) + 60 * 60 * 24; // 24 hours
-
-    const token = jwt.sign(
-      {
-        exp: expirationTime,
-        id: admin._id,
-      },
-      process.env.JWT_SECRET
-    );
+    const token = admin.generateAdminToken();
 
     const result = await Admin.findOneAndUpdate(
       { _id: admin._id },
       { isLoggedIn: true },
       { new: true }
     ).exec();
-
+    const options = {
+      httpOnly: true,
+      secure: true, // Only secure in production
+      sameSite: "None", // Required for cross-origin cookies
+    };
     res
       .header("x-auth-token", token)
       .status(200)
+      .cookie("token", token, options)
       .json({
         success: true,
         result: {
@@ -111,6 +109,7 @@ const login = async (req, res) => {
           userRole: "admin",
         },
         message: "Successfully login admin",
+        token : token
       });
   } catch (err) {
     res
@@ -121,7 +120,7 @@ const login = async (req, res) => {
 
 const isValidToken = async (req, res, next) => {
   try {
-    const token = req.header("x-auth-token");
+    const token = req.header("x-auth-token") || req.cookies?.token;
     if (!token)
       return res.status(401).json({
         success: false,
@@ -129,7 +128,6 @@ const isValidToken = async (req, res, next) => {
         message: "No authentication token, authorization denied.",
         jwtExpired: true,
       });
-
     const verified = jwt.verify(token, process.env.JWT_SECRET);
     if (!verified)
       return res.status(401).json({
@@ -138,14 +136,13 @@ const isValidToken = async (req, res, next) => {
         message: "Token verification failed, authorization denied.",
         jwtExpired: true,
       });
-
-    const admin = await Admin.findOne({ _id: verified.id });
+    const admin = await Admin.findOne({ _id: verified._id });
     if (!admin)
       return res.status(401).json({
         success: false,
         result: null,
-        message: "Admin doens't Exist, authorization denied.",
-        jwtExpired: true,
+        message: "Only Access to Admin",
+        jwtExpired: true, 
       });
 
     if (admin.isLoggedIn === false)
@@ -170,15 +167,116 @@ const isValidToken = async (req, res, next) => {
 };
 
 const logout = async (req, res) => {
-  const result = await Admin.findOneAndUpdate(
-    { _id: req.admin._id },
-    { isLoggedIn: false },
-    {
-      new: true,
-    }
-  ).exec();
-
-  res.status(200).json({ isLoggedIn: result.isLoggedIn });
+  try {
+    const result = await Admin.findOneAndUpdate(
+      { _id: req.admin._id },
+      { isLoggedIn: false },
+      {
+        new: true,
+      }
+    ).exec();
+    const options = {
+      httpOnly: true,
+      secure: true, // Only secure in production
+      sameSite: "None", // Required for cross-origin cookies
+    };
+    res.status(200).clearCookie("token", options).json({ isLoggedIn: result.isLoggedIn });
+  } catch (error) {
+    res.status(401).json({
+      message : error.message
+    })
+  }
+  
 };
 
-export { logout, register, isValidToken, login };
+
+
+const bulkUploadStudents = async (req, res) => {
+  try {
+    let allstudents = [];
+    const response = await csv().fromFile(req.file.path);
+    for (let i = 0; i < response.length; i++) {
+      allstudents.push({
+        name: response[i].name,
+        email: response[i].email,
+        institutionId: response[i].institutionId,
+        gender: response[i].gender,
+        mobileNumber: response[i].mobileNumber,
+        adminId: req.admin._id,
+        password: response[i].institutionId
+      });
+    }
+
+    const allusers = await Student.insertMany(allstudents);
+
+    if (!allusers) {
+      return res.status(402).json({
+        message: "Failed to Load the User"
+      });
+    }
+
+    res.status(200).json({
+      message: "All the Students Uploaded successfully."
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Error during bulk upload.",
+      error: error.message
+    });
+  }
+};
+
+
+const singleStudentUpload = async (req, res) => {
+  try {
+
+      const { name ,email , institutionId, gender, mobileNumber } = req.body;
+      if(!name || !email || !institutionId || !gender || !mobileNumber){
+        res.status(400).json({
+          message : "Please Provide All the Field"
+        })
+      }
+      const newStudent = new Student({
+          name,
+          institutionId,
+          gender,
+          email,
+          adminId : req.admin._id,
+          mobileNumber,
+          password : institutionId
+      });
+
+      // Save the student to the database
+      const studentuser = await newStudent.save();
+      res.status(200).json({ message: "Student data uploaded successfully!", data: {
+        student_id : studentuser._id,
+        email : studentuser.email,
+      }});
+  } catch (error) {
+      res.status(500).json({ message: "Error during single student upload.", error: error.message });
+  }
+};
+
+const bulkDeleteStudents = async (req, res) => {
+  try {
+    // Read CSV file
+    const studentsToDelete = await csv().fromFile(req.file.path);
+    const studentIdentifiers = studentsToDelete.map(student => student.institutionId); 
+    const result = await Student.deleteMany({ institutionId: { $in: studentIdentifiers } });
+
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ message: "No students found to delete!" });
+    }
+
+    res.status(200).json({
+      message: `${result.deletedCount} student(s) deleted successfully!`
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Error during bulk delete.",
+      error: error.message
+    });
+  }
+};
+
+export { logout, register, isValidToken, login  ,bulkUploadStudents , singleStudentUpload , bulkDeleteStudents};

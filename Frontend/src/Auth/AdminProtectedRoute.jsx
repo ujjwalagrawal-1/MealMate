@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
-AdminProtectedRoute = ({ children }) => {
-  const navigate = useNavigate();  // Replace useHistory with useNavigate
+const AdminProtectedRoute = ({ children }) => {
+  const navigate = useNavigate();  
 
   useEffect(() => {
     const token = localStorage.getItem("authToken");

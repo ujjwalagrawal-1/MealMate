@@ -1,6 +1,6 @@
 import express from "express";
 import { catchErrors } from "../handlers/errorHandlers.js";
-import { isValidToken} from "../controllers/authController.js";
+import { isValidToken} from "../controllers/AdminController.js";
 import { createMess, getMess, getMessById, setMessActive, setMessInactive} from "../controllers/messController.js";
 const messRouter = express.Router();
 

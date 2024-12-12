@@ -1,5 +1,5 @@
 import express from "express";
-import { isValidToken } from "../controllers/authController.js";
+import { isValidToken } from "../controllers/AdminController.js";
 import { generateQRCode, fetchQRCode, markAttendance} from "../controllers/attendanceController.js";
 const attendanceRouter = express.Router();
 
