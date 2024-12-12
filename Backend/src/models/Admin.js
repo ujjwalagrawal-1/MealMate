@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 mongoose.Promise = global.Promise;
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken"
 
 const AdminSchema = new mongoose.Schema({
   removed: {
@@ -47,7 +48,17 @@ AdminSchema.methods.generateHash = function (password) {
 AdminSchema.methods.validPassword = function (password) {
   return bcrypt.compareSync(password, this.password);
 };
-
+AdminSchema.methods.generateAdminToken = function () {
+  return jwt.sign(
+    {
+      _id: this._id
+    },
+    process.env.JWT_SECRET,
+    {
+      expiresIn: process.env.JWT_EXPIRES_IN,
+    }
+  );
+};
 const Admin = mongoose.model("Admin", AdminSchema);
 
 export default Admin; 
