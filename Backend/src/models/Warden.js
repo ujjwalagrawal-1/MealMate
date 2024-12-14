@@ -3,15 +3,7 @@ mongoose.Promise = global.Promise;
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken"
 
-const AdminSchema = new mongoose.Schema({
-  removed: {
-    type: Boolean,
-    default: false,
-  },
-  enabled: {
-    type: Boolean,
-    default: true,
-  },
+const WardenSchema = new mongoose.Schema({
   email: {
     type: String,
     unique: true,
@@ -25,10 +17,6 @@ const AdminSchema = new mongoose.Schema({
   },
   name: { type: String, required: true },
   surname: { type: String, required: true },
-  photo: {
-    type: String,
-    trim: true,
-  },
   createdAt: {
     type: Date,
     default: Date.now,
@@ -40,18 +28,19 @@ const AdminSchema = new mongoose.Schema({
 });
 
 // generating a hash
-AdminSchema.methods.generateHash = function (password) {
+WardenSchema.methods.generateHash = function (password) {
   return bcrypt.hashSync(password, bcrypt.genSaltSync(), null);
 };
 
 // checking if password is valid
-AdminSchema.methods.validPassword = function (password) {
+WardenSchema.methods.validPassword = function (password) {
   return bcrypt.compareSync(password, this.password);
 };
-AdminSchema.methods.generateAdminToken = function () {
+WardenSchema.methods.generateWardenToken = function () {
   return jwt.sign(
     {
-      _id: this._id
+      _id: this._id,
+      role: "Warden",
     },
     process.env.JWT_SECRET,
     {
@@ -59,7 +48,7 @@ AdminSchema.methods.generateAdminToken = function () {
     }
   );
 };
-const Admin = mongoose.model("Admin", AdminSchema);
+const Warden = mongoose.model("Warden", WardenSchema);
 
-export default Admin; 
+export default Warden; 
 

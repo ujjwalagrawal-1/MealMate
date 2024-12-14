@@ -36,6 +36,7 @@ const studentLogin = async (req, res) => {
       .json({
         message: "Login successful",
         token,
+        userRole :"student",
         student: {
           _id: student._id,
           institutionId: student.institutionId,

@@ -4,6 +4,7 @@ import MessPage from "./pages/MessDetailsPage";
 import MessHomePage from "./pages/MessHomePage.jsx";
 import AdminProtectedRoute from "./Auth/AdminProtectedRoute"; // Import the Protected Route
 import { MessProvider } from "./context/messContext.jsx";
+import StudentLoginPage from "./pages/StudentPotal/StudentLoginPage.jsx"
 function App() {
   return (
     <Router>
@@ -28,6 +29,11 @@ function App() {
           />
           {/* Login page route */}
           <Route path="/login" element={<AdminLoginPage />} />
+
+          {/* Student portal */}
+
+          <Route path="/student/login" element={<StudentLoginPage/>} />
+
         </Routes>
       </MessProvider>
     </Router>
