@@ -1,26 +1,29 @@
 import Mess from "../models/Mess.js";
+import Hall from "../models/Hall.js";
 import Warden from "../models/Warden.js";
 
 const createMess = async (req, res) => {
   try {
-    // Input validation
-    console.log(res.body)
-    if (!req.body.name || !req.body.halls  || !req.body.mealTimes) {
+    const { name, mealTimes} = req.body;
+    const warden = req.warden
+    console.log(req.body)
+
+    if (!name || !mealTimes) {
       return res
         .status(400)
-        .json({ error: "Name, halls, and meal times are required." });
+        .json({ error: "Name and meal times are required." });
     }
 
     // Ensure halls and mealTimes are arrays
-    if (!Array.isArray(req.body.halls) || !Array.isArray(req.body.mealTimes)) {
+    if ( !Array.isArray(mealTimes)) {
       return res
         .status(400)
         .json({ error: "Halls and meal times should be arrays." });
     }
 
     const existingMess = await Mess.findOne({
-      name: req.body.name,
-      WardenId: req.warden._id,
+      name: name,
+      WardenId: warden._id,
     });
 
     if (existingMess) {
@@ -32,11 +35,11 @@ const createMess = async (req, res) => {
     // Create mess
     const mess = await Mess.create({
       ...req.body,
-      WardenId: req.warden._id, // Associate mess with the Warden
+      wardenId: warden._id, // Associate mess with the Warden
     });
 
     await Warden.findByIdAndUpdate(
-      req.warden._id,
+      warden._id,
       { $push: { mess: mess._id } },
       { new: true }
     );
@@ -46,11 +49,16 @@ const createMess = async (req, res) => {
       message: "Mess created successfully.",
       mess,
     });
+    
   } catch (err) {
-    console.error(err.message);
-    res.status(500).json({ error: "Internal server error." });
+    res.status(500).json({
+      success: false,
+      message: err.message,
+    });
   }
 };
+
+
 
 // const updateMess = async (req, res) => {
 //   try {
@@ -93,7 +101,7 @@ const createMess = async (req, res) => {
 const getMess = async (req, res) => {
   try {
     // Fetch all messes associated with the Warden
-    const messes = await Mess.find({ WardenId: req.warden._id });
+    const messes = await Mess.find({ wardenId: req.warden });
 
     if (!messes || messes.length === 0) {
       return res.status(404).json({ error: "No messes found for this Warden." });
@@ -138,7 +146,7 @@ const setMessActive = async (req, res) => {
 
     // Find and update the mess to set it as active
     const mess = await Mess.findByIdAndUpdate(
-      id,
+      { _id: id, wardenId: req.warden },
       { isActive: true },
       { new: true }
     );
@@ -164,7 +172,7 @@ const setMessInactive = async (req, res) => {
 
     // Find and update the mess to set it as inactive
     const mess = await Mess.findByIdAndUpdate(
-      id,
+      { _id: id, wardenId: req.warden },
       { isActive: false },
       { new: true }
     );
@@ -184,4 +192,53 @@ const setMessInactive = async (req, res) => {
   }
 };
 
-export { createMess, getMess, getMessById, setMessActive, setMessInactive};
+const addHallToMess = async (req, res) => {
+  try {
+    const { messId } = req.params; // Mess ID from request parameters
+    const { name, capacity } = req.body; // Hall details
+    // Validate input
+    if (!name || !capacity) {
+      return res.status(400).json({ 
+        success: false, 
+        message: "Hall name and capacity are required." 
+      });
+    }
+
+    // Find the mess to which the hall should be added
+    const mess = await Mess.findById(messId);
+
+    console.log(mess)
+    if (!mess) {
+      return res.status(404).json({ 
+        success: false, 
+        message: "Mess not found." 
+      });
+    }
+
+    // Create a new Hall
+    const newHall = await Hall.create({
+      name,
+      capacity,
+  });
+
+    // Add the hall reference to the Mess
+    mess.halls.push(newHall._id);
+    await mess.save();
+
+    res.status(201).json({
+      success: true,
+      message: "Hall added to Mess successfully.",
+      hall: newHall,
+      mess,
+    });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ 
+      success: false, 
+      message: "Internal server error." 
+    });
+  }
+};
+
+
+export { createMess, getMess, getMessById, setMessActive, setMessInactive, addHallToMess};

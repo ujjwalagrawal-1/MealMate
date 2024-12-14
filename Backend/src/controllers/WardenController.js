@@ -129,7 +129,6 @@ const isValidToken = async (req, res, next) => {
         jwtExpired: true,
       });
     const verified = jwt.verify(token, process.env.JWT_SECRET);
-    console.log(verified._id);
     if (!verified)
       return res.status(401).json({
         success: false,
@@ -138,7 +137,6 @@ const isValidToken = async (req, res, next) => {
         jwtExpired: true,
       });
     const warden = await Warden.findOne({ _id: verified._id });
-    console.log(warden);
     if (!warden)
       return res.status(401).json({
         success: false,
@@ -155,7 +153,7 @@ const isValidToken = async (req, res, next) => {
         jwtExpired: true,
       });
     else {
-      req.warden = warden;
+      req.warden = warden._id;
       next();
     }
   } catch (err) {
