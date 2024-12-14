@@ -55,10 +55,11 @@ messWorkerSchema.pre('insertMany', async function(next, docs) {
 });
 
 
-messWorkerSchema.methods.generateStudentToken = function () {
+messWorkerSchema.methods.generateWorkerToken = function () {
     return jwt.sign(
         {
             _id: this._id,
+            role: 'MessWorker',
         },
         process.env.JWT_SECRET,
         {

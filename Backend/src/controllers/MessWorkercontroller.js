@@ -19,7 +19,7 @@ const messworkerLogin = async (req, res) => {
       }
   
       // Generate JWT token
-      const token = messworker.generateStudentToken();
+      const token = messworker.generateWorkerToken();
       const options = {
         httpOnly: true,
         secure: true, // Only secure in production

@@ -8,12 +8,11 @@ dotenv.config({
 })
 
 //Routers imports
-import authRouter from './routes/Adminauth.Routes.js';
 import messRouter from './routes/messRoutes.js';
 import attendanceRouter from './routes/attendanceRoutes.js';
 import Studentroutes from './routes/Student.Routes.js';
 import messworkerroutes from './routes/Messworker.Routes.js';
-
+import wardenRoutes from './routes/Warden.Routes.js';
 // Initialize express app
 const app = express();
 const port = process.env.PORT || 3000;
@@ -39,7 +38,7 @@ app.get("/", function (req,res) {
 })
 app.use("/api/worker",messworkerroutes);
 app.use("/api/student",Studentroutes);
-app.use("/api/admin", authRouter)
 app.use("/api/mess", messRouter)
 app.use("/api/attendance", attendanceRouter)
+app.use("/api/warden", wardenRoutes);
 export { app, port };

@@ -1,6 +1,6 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import Admin from "../models/Admin.js";
+import Warden from "../models/Warden.js";
 import dotenv from "dotenv";
 import { Student } from "../models/Student.js";
 import csv from 'csvtojson'
@@ -20,8 +20,8 @@ const register = async (req, res) => {
         .status(400)
         .json({ msg: "Enter the same password twice for verification." });
 
-    const existingAdmin = await Admin.findOne({ email: email });
-    if (existingAdmin)
+    const existingWarden = await Warden.findOne({ email: email });
+    if (existingWarden)
       return res
         .status(400)
         .json({ msg: "An account with this email already exists." });
@@ -31,21 +31,21 @@ const register = async (req, res) => {
     const salt = await bcrypt.genSalt();
     const passwordHash = await bcrypt.hash(password, salt);
 
-    const newAdmin = new Admin({
+    const newWarden = new Warden({
       email,
       password: passwordHash,
       name,
       surname,
     });
-    const savedAdmin = await newAdmin.save();
+    const savedWarden = await newWarden.save();
     res.status(200)
     .send({
       success: true,
-      message : "Admin Created Successfully!!",
-      admin: {
-        id: savedAdmin._id,
-        name: savedAdmin.name,
-        surname: savedAdmin.surname,
+      message : "Warden Created Successfully!!",
+      Warden: {
+        id: savedWarden._id,
+        name: savedWarden.name,
+        surname: savedWarden.surname,
       }
     });
   } catch (err) {
@@ -60,20 +60,19 @@ const register = async (req, res) => {
 const login = async (req, res) => {
   try {
     const { email, password, rememberMe } = req.body; 
-    console.log(req.body);
     // Validate fields
     if (!email || !password)
       return res.status(400).json({ msg: "Not all fields have been entered." });
 
-    const admin = await Admin.findOne({ email: email });
-    if (!admin)
+    const warden = await Warden.findOne({ email: email });
+    if (!warden)
       return res.status(400).json({
         success: false,
         result: null,
         message: "No account with this email has been registered.",
       });
 
-    const isMatch = await bcrypt.compare(password, admin.password);
+    const isMatch = await bcrypt.compare(password, warden.password);
     if (!isMatch)
       return res.status(400).json({
         success: false,
@@ -82,10 +81,10 @@ const login = async (req, res) => {
       });
 
     // Set token expiration time based on Remember Me
-    const token = admin.generateAdminToken();
+    const token = warden.generateWardenToken();
 
-    const result = await Admin.findOneAndUpdate(
-      { _id: admin._id },
+    const result = await Warden.findOneAndUpdate(
+      { _id: warden._id },
       { isLoggedIn: true },
       { new: true }
     ).exec();
@@ -101,14 +100,14 @@ const login = async (req, res) => {
       .json({
         success: true,
         result: {
-          admin: {
+          warden: {
             id: result._id,
             name: result.name,
             isLoggedIn: result.isLoggedIn,
           },
-          userRole: "admin",
+          userRole: "Warden",
         },
-        message: "Successfully login admin",
+        message: "Successfully login Warden",
         token : token
       });
   } catch (err) {
@@ -129,6 +128,7 @@ const isValidToken = async (req, res, next) => {
         jwtExpired: true,
       });
     const verified = jwt.verify(token, process.env.JWT_SECRET);
+    console.log(verified._id);
     if (!verified)
       return res.status(401).json({
         success: false,
@@ -136,24 +136,25 @@ const isValidToken = async (req, res, next) => {
         message: "Token verification failed, authorization denied.",
         jwtExpired: true,
       });
-    const admin = await Admin.findOne({ _id: verified._id });
-    if (!admin)
+    const warden = await Warden.findOne({ _id: verified._id });
+    console.log(warden);
+    if (!warden)
       return res.status(401).json({
         success: false,
         result: null,
-        message: "Only Access to Admin",
+        message: "Only Access to Warden",
         jwtExpired: true, 
       });
 
-    if (admin.isLoggedIn === false)
+    if (warden.isLoggedIn === false)
       return res.status(401).json({
         success: false,
         result: null,
-        message: "Admin is already logout try to login, authorization denied.",
+        message: "Warden is already logout try to login, authorization denied.",
         jwtExpired: true,
       });
     else {
-      req.admin = admin;
+      req.warden = warden;
       next();
     }
   } catch (err) {
@@ -168,8 +169,8 @@ const isValidToken = async (req, res, next) => {
 
 const logout = async (req, res) => {
   try {
-    const result = await Admin.findOneAndUpdate(
-      { _id: req.admin._id },
+    const result = await Warden.findOneAndUpdate(
+      { _id: req.warden._id },
       { isLoggedIn: false },
       {
         new: true,
@@ -202,7 +203,7 @@ const bulkUploadStudents = async (req, res) => {
         institutionId: response[i].institutionId,
         gender: response[i].gender,
         mobileNumber: response[i].mobileNumber,
-        adminId: req.admin._id,
+        WardenId: req.Warden._id,
         password: response[i].institutionId
       });
     }
@@ -241,7 +242,7 @@ const singleStudentUpload = async (req, res) => {
           institutionId,
           gender,
           email,
-          adminId : req.admin._id,
+          WardenId : req.Warden._id,
           mobileNumber,
           password : institutionId
       });
@@ -289,7 +290,7 @@ const bulkUploadMessWorkers = async (req, res) => {
         aadharNumber: response[i].aadharNumber,
         mobileNumber: response[i].mobileNumber,
         address: response[i].address,
-        adminId: req.admin._id,
+        WardenId: req.Warden._id,
       });
     }
 
@@ -329,7 +330,7 @@ const singleMessWorkerUpload = async (req, res) => {
       aadharNumber,
       mobileNumber,
       address,
-      adminId: req.admin._id,
+      WardenId: req.Warden._id,
     });
 
     const messWorker = await newMessWorker.save();

@@ -81,6 +81,7 @@ studentSchema.methods.generateStudentToken = function () {
     return jwt.sign(
         {
             _id: this._id,
+            role: "Student",
         },
         process.env.JWT_SECRET,
         {

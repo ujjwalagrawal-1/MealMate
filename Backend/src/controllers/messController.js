@@ -1,5 +1,5 @@
 import Mess from "../models/Mess.js";
-import Admin from "../models/Admin.js";
+import Warden from "../models/Warden.js";
 
 const createMess = async (req, res) => {
   try {
@@ -20,7 +20,7 @@ const createMess = async (req, res) => {
 
     const existingMess = await Mess.findOne({
       name: req.body.name,
-      adminId: req.admin._id,
+      WardenId: req.Warden._id,
     });
 
     if (existingMess) {
@@ -32,11 +32,11 @@ const createMess = async (req, res) => {
     // Create mess
     const mess = await Mess.create({
       ...req.body,
-      adminId: req.admin._id, // Associate mess with the admin
+      WardenId: req.Warden._id, // Associate mess with the Warden
     });
 
-    await Admin.findByIdAndUpdate(
-      req.admin._id,
+    await Warden.findByIdAndUpdate(
+      req.Warden._id,
       { $push: { mess: mess._id } },
       { new: true }
     );
@@ -60,7 +60,7 @@ const createMess = async (req, res) => {
 //     }
 
 //     // Check if mess exists
-//     const mess = await Mess.findOne({ _id: req.params.id, adminId: req.admin._id });
+//     const mess = await Mess.findOne({ _id: req.params.id, WardenId: req.Warden._id });
 
 //     if (!mess) {
 //       return res.status(404).json({ error: "Mess not found." });
@@ -92,11 +92,11 @@ const createMess = async (req, res) => {
 
 const getMess = async (req, res) => {
   try {
-    // Fetch all messes associated with the admin
-    const messes = await Mess.find({ adminId: req.admin._id });
+    // Fetch all messes associated with the Warden
+    const messes = await Mess.find({ WardenId: req.Warden._id });
 
     if (!messes || messes.length === 0) {
-      return res.status(404).json({ error: "No messes found for this admin." });
+      return res.status(404).json({ error: "No messes found for this Warden." });
     }
 
     res.status(200).json({
