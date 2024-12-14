@@ -13,7 +13,8 @@ import {
   bulkDeleteStudents,
   bulkUploadMessWorkers,
   bulkDeleteMessWorkers,
-  singleMessWorkerUpload
+  singleMessWorkerUpload,
+  fetchuserdata
 } from "../controllers/WardenController.js";
 
 import { upload } from "../middlewares/multer.middleware.js";
@@ -29,5 +30,7 @@ WardenRoutes.post("/add_single_student",isValidToken,catchErrors(singleStudentUp
 WardenRoutes.post("/bulk_upload/messworkerdata",isValidToken,upload.single('file'),catchErrors(bulkUploadMessWorkers));
 WardenRoutes.post("/bulk_delete/messworker_data",isValidToken,upload.single('file'),catchErrors(bulkDeleteMessWorkers));
 WardenRoutes.post("/add_single_messworker",isValidToken,catchErrors(singleMessWorkerUpload))
+
+WardenRoutes.get("/getwardendata",isValidToken,catchErrors(fetchuserdata))
 
 export default WardenRoutes;

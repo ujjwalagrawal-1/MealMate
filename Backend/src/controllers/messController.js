@@ -20,7 +20,7 @@ const createMess = async (req, res) => {
 
     const existingMess = await Mess.findOne({
       name: req.body.name,
-      WardenId: req.Warden._id,
+      WardenId: req.warden._id,
     });
 
     if (existingMess) {
@@ -32,11 +32,11 @@ const createMess = async (req, res) => {
     // Create mess
     const mess = await Mess.create({
       ...req.body,
-      WardenId: req.Warden._id, // Associate mess with the Warden
+      WardenId: req.warden._id, // Associate mess with the Warden
     });
 
     await Warden.findByIdAndUpdate(
-      req.Warden._id,
+      req.warden._id,
       { $push: { mess: mess._id } },
       { new: true }
     );
@@ -60,7 +60,7 @@ const createMess = async (req, res) => {
 //     }
 
 //     // Check if mess exists
-//     const mess = await Mess.findOne({ _id: req.params.id, WardenId: req.Warden._id });
+//     const mess = await Mess.findOne({ _id: req.params.id, WardenId: req.warden._id });
 
 //     if (!mess) {
 //       return res.status(404).json({ error: "Mess not found." });
@@ -93,7 +93,7 @@ const createMess = async (req, res) => {
 const getMess = async (req, res) => {
   try {
     // Fetch all messes associated with the Warden
-    const messes = await Mess.find({ WardenId: req.Warden._id });
+    const messes = await Mess.find({ WardenId: req.warden._id });
 
     if (!messes || messes.length === 0) {
       return res.status(404).json({ error: "No messes found for this Warden." });

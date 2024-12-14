@@ -4,6 +4,7 @@ import Warden from "../models/Warden.js";
 import dotenv from "dotenv";
 import { Student } from "../models/Student.js";
 import csv from 'csvtojson'
+import { MessWorker } from "../models/MessWorker.js";
 dotenv.config({ path: ".variables.env" });
 
 const register = async (req, res) => {
@@ -203,7 +204,7 @@ const bulkUploadStudents = async (req, res) => {
         institutionId: response[i].institutionId,
         gender: response[i].gender,
         mobileNumber: response[i].mobileNumber,
-        WardenId: req.Warden._id,
+        WardenId: req.warden._id,
         password: response[i].institutionId
       });
     }
@@ -242,7 +243,7 @@ const singleStudentUpload = async (req, res) => {
           institutionId,
           gender,
           email,
-          WardenId : req.Warden._id,
+          WardenId : req.warden._id,
           mobileNumber,
           password : institutionId
       });
@@ -254,6 +255,7 @@ const singleStudentUpload = async (req, res) => {
         email : studentuser.email,
       }});
   } catch (error) {
+      // console.log("uess");
       res.status(500).json({ message: "Error during single student upload.", error: error.message });
   }
 };
@@ -290,7 +292,7 @@ const bulkUploadMessWorkers = async (req, res) => {
         aadharNumber: response[i].aadharNumber,
         mobileNumber: response[i].mobileNumber,
         address: response[i].address,
-        WardenId: req.Warden._id,
+        WardenId: req.warden._id,
       });
     }
 
@@ -330,7 +332,7 @@ const singleMessWorkerUpload = async (req, res) => {
       aadharNumber,
       mobileNumber,
       address,
-      WardenId: req.Warden._id,
+      WardenId: req.warden._id,
     });
 
     const messWorker = await newMessWorker.save();
@@ -376,6 +378,30 @@ const bulkDeleteMessWorkers = async (req, res) => {
     });
   }
 };
+const fetchuserdata = async(req,res) => {
+  try {
+    if(!req.warden){
+      res.status(500).json({
+        message : "Failed to get the User !!"
+      })
+    }
+  
+    const data = req.warden;
+    if(data.password){
+      data.password = "";
+    }
+    data.role = "Warden"
+  
+    res.status(200).json({
+      message : "User Fetched Successfully",
+      data
+    })
+  } catch (error) {
+    res.status(400).json({
+      message : error.message
+    })
+  }
+}
 export { logout, register, isValidToken, login  ,bulkUploadStudents , singleStudentUpload , bulkDeleteStudents , bulkUploadMessWorkers,
   singleMessWorkerUpload,
-  bulkDeleteMessWorkers,};
+  bulkDeleteMessWorkers,fetchuserdata};

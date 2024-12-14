@@ -13,7 +13,7 @@ const MessSchema = new mongoose.Schema({
   mealTimes: [{ type: String, enum: ["Breakfast", "Lunch", "Dinner"] }],
   isActive: { type: Boolean, default: false },
   collaborators: [{ type: mongoose.Schema.Types.ObjectId, ref: "Admin" }],
-  adminId: { type: mongoose.Schema.Types.ObjectId, ref: "Admin" },
+  WardenId: { type: mongoose.Schema.Types.ObjectId, ref: "Admin" },
   qrCodeUrl: { type: String },
 });
 
