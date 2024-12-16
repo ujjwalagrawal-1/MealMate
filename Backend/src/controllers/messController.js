@@ -107,8 +107,6 @@ const getMess = async (req, res) => {
       return res.status(404).json({ error: "No messes found for this Warden." });
     }
 
-    console.log(messes)
-
     for(let i = 0; i < messes.length; i++) {
       let halls = await Hall.find({ _id: { $in: messes[i].halls } });
       messes[i].halls = halls;
