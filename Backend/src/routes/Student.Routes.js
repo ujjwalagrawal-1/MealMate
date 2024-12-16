@@ -11,8 +11,3 @@ Studentroutes.get("/getallstudent",catchErrors(getAllStudents))
 Studentroutes.get("getstudentbyid/:id",catchErrors(getStudentById));
 
 export default Studentroutes
-
-
-
-
-

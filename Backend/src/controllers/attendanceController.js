@@ -5,57 +5,7 @@ import decreaseFilledQueue from "../queueWorker.js"
 
 const domain = process.env.DOMAIN || "http://localhost:3000";
 
-const generateQRCode = async (req, res) => {
-  try {
-    const { id } = req.params;
 
-    // Find the mess
-    const mess = await Mess.findById(id);
-    if (!mess) {
-      return res.status(404).json({ error: "Mess not found." });
-    }
-
-    // Generate QR code with mess-specific data (e.g., a unique URL or ID)
-    const qrData = `${domain}/attendance?messId=${id}`;
-    const qrCodeUrl = await QRCode.toDataURL(qrData);
-
-    // Save QR code URL to mess document
-    mess.qrCodeUrl = qrCodeUrl;
-    await mess.save();
-
-    res.status(200).json({
-      success: true,
-      message: "QR code generated and associated with the mess.",
-      qrCodeUrl,
-    });
-  } catch (err) {
-    console.error("Error generating QR code:", err.message);
-    res.status(500).json({ error: "Internal server error." });
-  }
-};
-
-const fetchQRCode = async (req, res) => {
-  try {
-    const { messId } = req.params;
-
-    // Find the mess by ID and return the QR code
-    const mess = await Mess.findById(messId);
-
-    if (!mess || !mess.qrCodeUrl) {
-      return res
-        .status(404)
-        .json({ success: true, error: "QR code not found for this mess." });
-    }
-
-    res.status(200).json({
-      success: true,
-      qrCodeUrl: mess.qrCodeUrl,
-    });
-  } catch (err) {
-    console.error("Error fetching QR code:", err.message);
-    res.status(500).json({ error: "Internal server error." });
-  }
-};
 
 
 const markAttendance = async (req, res) => {
@@ -128,4 +78,4 @@ const markAttendance = async (req, res) => {
   }
 };
 
-export { generateQRCode, fetchQRCode, markAttendance };
+export {  markAttendance };

@@ -5,6 +5,9 @@ import MessHomePage from "./pages/MessHomePage.jsx";
 import AdminProtectedRoute from "./Auth/AdminProtectedRoute"; // Import the Protected Route
 import { MessProvider } from "./context/messContext.jsx";
 import StudentLoginPage from "./pages/StudentPotal/StudentLoginPage.jsx"
+
+//testing
+import QR from "./components/QrReader.jsx"
 function App() {
   return (
     <Router>
@@ -33,7 +36,7 @@ function App() {
           {/* Student portal */}
 
           <Route path="/student/login" element={<StudentLoginPage/>} />
-
+          <Route path="/qr" element={<QR />} />
         </Routes>
       </MessProvider>
     </Router>
