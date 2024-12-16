@@ -6,6 +6,6 @@ const router = express.Router();
 router.get('/generateQRCode/:id', isValidToken, generateQRCode)
 
 // Route to fetch QR code for a specific mess
-router.get('/fetchQRCode/:messId', isValidToken, fetchQRCode);
+router.get('/fetchQRCode/:id', isValidToken, fetchQRCode);
 
 export default router

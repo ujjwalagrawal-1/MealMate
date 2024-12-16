@@ -6,25 +6,23 @@ const AdminLoginPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const [email, password, rememberMe] = e.target.elements;
-
     try {
-      const res = await axios.post("http://localhost:3000/api/admin/login", {
+      const res = await axios.post("http://localhost:3000/api/warden/login", {
         email: email.value,
         password: password.value,
         rememberMe: rememberMe.checked,
       });
-      console.log(res.data.result.userRole)
+      console.log(res)
       const token = res.headers["x-auth-token"];
       if (token) {
         // Store token in localStorage or sessionStorage
         localStorage.setItem("authToken", token);
 
-        if (res.data.result.userRole === "admin") {
-          localStorage.setItem("userRole", "admin"); // Store the user role
+        if (res.data.result.userRole === "Warden") {
+          localStorage.setItem("userRole", "Warden"); // Store the user role
+          console.log("Warden Login Successful");
+          navigate("/mess");
         }
-
-        navigate("/mess");
-
       } else {
         alert("Login failed: No token received.");
       }

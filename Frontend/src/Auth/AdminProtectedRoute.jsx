@@ -8,7 +8,7 @@ const AdminProtectedRoute = ({ children }) => {
     const token = localStorage.getItem("authToken");
     const userRole = localStorage.getItem("userRole");
 
-    if (!token || userRole !== "admin") {
+    if (!token || userRole !== "Warden") {
       // Redirect to login if no token or not an admin
       navigate("/login");
     }

@@ -16,6 +16,7 @@ export const MessProvider = ({ children }) => {
           },
         });
         if (res.data.success) {
+          console.log("mes context", res.data.messes);
           setMesses(res.data.messes);
         } else {
           console.error("Failed to fetch messes:", res.data.message);

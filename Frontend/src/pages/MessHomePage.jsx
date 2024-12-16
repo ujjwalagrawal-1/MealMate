@@ -4,7 +4,7 @@ const MessHomePage = () => {
   // Access the passed mess data from the state
   const { state } = useLocation();
   const { mess } = state || {}; // Destructure mess from state
-    console.log(mess)
+  console.log(mess)
   if (!mess) {
     return <div>Loading...</div>;
   }
@@ -12,14 +12,24 @@ const MessHomePage = () => {
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">{mess.name} Details</h1>
-      
+
       {/* Display Hall details */}
-      <div>
-        <h2 className="font-semibold">Halls:</h2>
-        <ul className="list-disc pl-5">
+      <div className="bg-gray-50 p-4 rounded-lg shadow-md">
+        <h2 className="text-xl font-semibold mb-4 text-gray-700">Halls</h2>
+        <ul className="space-y-3">
           {mess.halls.map((hall, index) => (
-            <li key={index}>
-              {hall.name} - Capacity: {hall.filled} / {hall.capacity}
+            <li
+              key={index}
+              className="flex items-center justify-between bg-white p-4 rounded-lg shadow-sm border border-gray-200 hover:bg-gray-100"
+            >
+              <div className="text-gray-800">
+                <p className="font-medium">{hall.name}</p>
+                <p className="text-sm text-gray-600">
+                  Capacity: <span className="font-semibold">{hall.filled}</span>{" "}
+                  / {hall.capacity}
+                </p>
+              </div>
+              <MessQRCode hallId={hall._id} />
             </li>
           ))}
         </ul>
@@ -30,9 +40,6 @@ const MessHomePage = () => {
         <h2 className="font-semibold">Meal Times:</h2>
         <p>{mess.mealTimes.join(", ")}</p>
       </div>
-
-      {/* You can add other operations or features here */}
-      <MessQRCode messId={mess._id}/>
     </div>
   );
 };

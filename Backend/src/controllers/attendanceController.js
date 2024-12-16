@@ -5,12 +5,9 @@ import decreaseFilledQueue from "../queueWorker.js"
 
 const domain = process.env.DOMAIN || "http://localhost:3000";
 
-
-
-
 const markAttendance = async (req, res) => {
   try {
-    const { messId, studentId, meal } = req.body;
+    const { hallId, wardenId, studentId, meal } = req.body;
     // Validate meal type
     if (!["Breakfast", "Lunch", "Dinner"].includes(meal)) {
       return res

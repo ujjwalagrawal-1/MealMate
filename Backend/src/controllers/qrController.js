@@ -13,7 +13,7 @@ const generateQRCode = async (req, res) => {
       }
       
       console.log(hall)
-      const qrData = hall;
+      const qrData = hall._id.toString();
       const qrCodeUrl = await QRCode.toDataURL(qrData);
   
       // Save QR code URL to mess document
@@ -33,12 +33,12 @@ const generateQRCode = async (req, res) => {
   
   const fetchQRCode = async (req, res) => {
     try {
-      const { messId } = req.params;
+      const { id } = req.params;
   
       // Find the mess by ID and return the QR code
-      const mess = await Mess.findById(messId);
+      const hall = await Hall.findById(id);
   
-      if (!mess || !mess.qrCodeUrl) {
+      if (!hall || !hall.qrCodeUrl) {
         return res
           .status(404)
           .json({ success: true, error: "QR code not found for this mess." });
@@ -46,7 +46,7 @@ const generateQRCode = async (req, res) => {
   
       res.status(200).json({
         success: true,
-        qrCodeUrl: mess.qrCodeUrl,
+        qrCodeUrl: hall.qrCodeUrl,
       });
     } catch (err) {
       console.error("Error fetching QR code:", err.message);
