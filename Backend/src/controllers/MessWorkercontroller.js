@@ -137,5 +137,29 @@ const getworkerById = async (req, res) => {
         res.status(500).json({ message: "Error fetching student.", error: error.message });
     }
 };
+const fetchuserdata = async(req,res) => {
+  try {
+    if(!req.messworker){
+      res.status(500).json({
+        message : "Failed to get the User !!"
+      })
+    }
+  
+    const data = req.messworker;
+    if(data.password){
+      data.password = "";
+    }
+    data.role = "MessWorker"
+  
+    req.status(200).json({
+      message : "User Fetched Successfully",
+      data
+    })
+  } catch (error) {
+    res.status(400).json({
+      message : error.message
+    })
+  }
+}
 
-export { messworkerLogin , updatemessworkerPassword , getallworker , getworkerById , isValidToken}
+export { messworkerLogin , updatemessworkerPassword , getallworker , getworkerById , isValidToken , fetchuserdata}

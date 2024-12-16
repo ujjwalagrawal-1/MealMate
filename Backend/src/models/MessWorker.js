@@ -23,9 +23,9 @@ const messWorkerSchema = new mongoose.Schema({
         required: true,
         trim: true,
     },
-    adminId: {
+    WardenId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Admin',
+        ref: 'Warden',
         required: true,
     },
     createdAt: {

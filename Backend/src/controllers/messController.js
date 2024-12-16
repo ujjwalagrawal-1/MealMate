@@ -68,7 +68,7 @@ const createMess = async (req, res) => {
 //     }
 
 //     // Check if mess exists
-//     const mess = await Mess.findOne({ _id: req.params.id, WardenId: req.Warden._id });
+//     const mess = await Mess.findOne({ _id: req.params.id, WardenId: req.warden._id });
 
 //     if (!mess) {
 //       return res.status(404).json({ error: "Mess not found." });

@@ -7,7 +7,6 @@ const MessSchema = new mongoose.Schema({
   isActive: { type: Boolean, default: false },
   collaborators: [{ type: mongoose.Schema.Types.ObjectId, ref: "Admin" }],
   wardenId: { type: mongoose.Schema.Types.ObjectId, ref: "Admin" },
-  
 });
 
 const Mess = mongoose.model("Mess", MessSchema);

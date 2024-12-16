@@ -27,9 +27,9 @@ const studentSchema = new mongoose.Schema({
         enum : ["Male" , "Female"],
         required : true
     },
-    adminId: {
+    WardenId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Admin", // Referencing the Admin model
+        ref: "Warden", // Referencing the Admin model
         required: true,
     },
     mobileNumber: {
