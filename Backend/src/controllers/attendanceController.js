@@ -1,66 +1,12 @@
-import QRCode from "qrcode";
+import schedule from "node-schedule";
 import Mess from "../models/Mess.js";
-import Attendance from "../models/AttendanceScehma.js";
-import decreaseFilledQueue from "../queueWorker.js"
-
-const domain = process.env.DOMAIN || "http://localhost:3000";
-
-const generateQRCode = async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    // Find the mess
-    const mess = await Mess.findById(id);
-    if (!mess) {
-      return res.status(404).json({ error: "Mess not found." });
-    }
-
-    // Generate QR code with mess-specific data (e.g., a unique URL or ID)
-    const qrData = `${domain}/attendance?messId=${id}`;
-    const qrCodeUrl = await QRCode.toDataURL(qrData);
-
-    // Save QR code URL to mess document
-    mess.qrCodeUrl = qrCodeUrl;
-    await mess.save();
-
-    res.status(200).json({
-      success: true,
-      message: "QR code generated and associated with the mess.",
-      qrCodeUrl,
-    });
-  } catch (err) {
-    console.error("Error generating QR code:", err.message);
-    res.status(500).json({ error: "Internal server error." });
-  }
-};
-
-const fetchQRCode = async (req, res) => {
-  try {
-    const { messId } = req.params;
-
-    // Find the mess by ID and return the QR code
-    const mess = await Mess.findById(messId);
-
-    if (!mess || !mess.qrCodeUrl) {
-      return res
-        .status(404)
-        .json({ success: true, error: "QR code not found for this mess." });
-    }
-
-    res.status(200).json({
-      success: true,
-      qrCodeUrl: mess.qrCodeUrl,
-    });
-  } catch (err) {
-    console.error("Error fetching QR code:", err.message);
-    res.status(500).json({ error: "Internal server error." });
-  }
-};
-
+import Hall from "../models/Hall.js";
+import Attendance from "../models/Attendance.js";
 
 const markAttendance = async (req, res) => {
   try {
-    const { messId, studentId, meal } = req.body;
+    const { messId, hallId, wardenId, studentId, meal } = req.body;
+
     // Validate meal type
     if (!["Breakfast", "Lunch", "Dinner"].includes(meal)) {
       return res
@@ -76,25 +22,8 @@ const markAttendance = async (req, res) => {
         .json({ success: false, error: "Invalid or inactive mess." });
     }
 
-    // Check if the student has already marked attendance for this meal
-    const date = new Date().toISOString().slice(0, 10);
-    const alreadyMarked = await Attendance.findOne({
-      messId,
-      studentId,
-      meal,
-      date,
-    });
-    if (alreadyMarked) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          error: "Attendance already marked for this meal.",
-        });
-    }
-
     // Find the serving hall
-    const hall = mess.halls.find((h) => h.serving);
+    const hall = await Hall.findById(hallId);
     if (!hall) {
       return res
         .status(400)
@@ -105,19 +34,43 @@ const markAttendance = async (req, res) => {
       return res.status(400).json({ success: false, error: "Hall is full." });
     }
 
+    // Check if the student has already marked attendance for this meal
+    const date = new Date().toISOString().slice(0, 10);
+    const alreadyMarked = await Attendance.findOne({
+      messId,
+      studentId,
+      meal,
+      date,
+    });
+    if (alreadyMarked) {
+      return res.status(400).json({
+        success: false,
+        error: "Attendance already marked for this meal.",
+      });
+    }
+
     // Mark attendance
     hall.filled += 1;
-    await mess.save();
+    await hall.save();
 
-    const hallName = hall.name;
-    // Add a job to decrease the filled count after 15 minutes
-    console.log("calling bull");
-    decreaseFilledQueue.add(
-      { messId, hallName },
-      { delay: 1 * 10 * 1000 } // 15 minutes
-    );
     // Log attendance
-    await Attendance.create({ studentId, messId, meal, date }); 
+    await Attendance.create({ studentId, messId, meal, date });
+
+    // Schedule a job to decrease the hall's `filled` count after 15 minutes
+    schedule.scheduleJob(Date.now() + 15 * 60 * 1000, async () => {
+      try {
+        const updatedHall = await Hall.findById(hallId);
+        if (updatedHall) {
+          updatedHall.filled = Math.max(0, updatedHall.filled - 1); // Ensure `filled` doesn't go below 0
+          await updatedHall.save();
+          console.log(
+            `Attendance decreased for hall: ${updatedHall.name} after 15 minutes.`
+          );
+        }
+      } catch (err) {
+        console.error("Error decreasing attendance:", err.message);
+      }
+    });
 
     res
       .status(200)
@@ -128,4 +81,4 @@ const markAttendance = async (req, res) => {
   }
 };
 
-export { generateQRCode, fetchQRCode, markAttendance };
+export { markAttendance };

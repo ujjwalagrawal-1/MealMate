@@ -13,6 +13,7 @@ import attendanceRouter from './routes/attendanceRoutes.js';
 import Studentroutes from './routes/Student.Routes.js';
 import messworkerroutes from './routes/Messworker.Routes.js';
 import wardenRoutes from './routes/Warden.Routes.js';
+import qrRouter from './routes/qrRoutes.js';
 // Initialize express app
 const app = express();
 const port = process.env.PORT || 3000;
@@ -41,4 +42,5 @@ app.use("/api/student",Studentroutes);
 app.use("/api/mess", messRouter)
 app.use("/api/attendance", attendanceRouter)
 app.use("/api/warden", wardenRoutes);
+app.use("/api/qr", qrRouter);
 export { app, port };

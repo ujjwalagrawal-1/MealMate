@@ -12,8 +12,3 @@ Studentroutes.get("getstudentbyid/:id",catchErrors(getStudentById));
 Studentroutes.get("/getstudentdata",isValidToken,catchErrors(fetchuserdata))
 
 export default Studentroutes
-
-
-
-
-

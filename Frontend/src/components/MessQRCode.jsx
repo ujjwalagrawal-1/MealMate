@@ -2,16 +2,16 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 const apiUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:3000";
 
-const MessQRCode = ({messId}) => {
+const MessQRCode = ({hallId}) => {
   const [qrCodeUrl, setQrCodeUrl] = useState("");
   const [loading, setLoading] = useState(true);
-    console.log(messId)
+    console.log(hallId)
   useEffect(() => {
     const fetchStoredQRCode = async () => {
       try {
         // Attempt to fetch the stored QR code
         const response = await axios.get(
-          `${apiUrl}/api/attendance/fetchQRCode/${messId}`,
+          `${apiUrl}/api/qr/fetchQRCode/${hallId}`,
           {
             headers: {
               "x-auth-token": localStorage.getItem("authToken"),
@@ -32,7 +32,7 @@ const MessQRCode = ({messId}) => {
       try {
         // Call the generate route to create a new QR code
         const response = await axios.get(
-          `${apiUrl}/api/attendance/generateQRCode/${messId}`,
+          `${apiUrl}/api/qr/generateQRCode/${hallId}`,
           {
             headers: {
               "x-auth-token": localStorage.getItem("authToken"),
@@ -46,7 +46,7 @@ const MessQRCode = ({messId}) => {
     };
 
     fetchStoredQRCode();
-  }, [messId]);
+  }, [hallId]);
 
   if (loading) return <p>Loading...</p>;
 
