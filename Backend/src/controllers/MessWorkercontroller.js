@@ -69,6 +69,7 @@ const messworkerLogin = async (req, res) => {
           jwtExpired: true,
         });
       const messworker = await MessWorker.findOne({ _id: verified._id });
+      messworker.password = "";
       if (!messworker)
         return res.status(401).json({
           success: false,

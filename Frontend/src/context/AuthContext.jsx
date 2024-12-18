@@ -53,7 +53,7 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
-    const fetchRoleData = memo(async (url) => {
+    const fetchRoleData = async (url) => {
         try {
             const response = await axios.get(url, {
                 headers: {
@@ -66,7 +66,7 @@ export const AuthProvider = ({ children }) => {
             console.error("Error in API call:", error);
             throw error;
         }
-    });
+    };
     
     useEffect(() => {
         if (token && role) {

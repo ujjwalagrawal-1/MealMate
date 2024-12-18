@@ -2,11 +2,12 @@ import schedule from "node-schedule";
 import Mess from "../models/Mess.js";
 import Hall from "../models/Hall.js";
 import Attendance from "../models/Attendance.js";
+import { broadcast } from "../utils/WebSocket.js";
 
 const markAttendance = async (req, res) => {
   try {
-    const { messId, hallId, wardenId, studentId, meal } = req.body;
-
+    const { messId, hallId, studentId, meal } = req.body;
+    
     // Validate meal type
     if (!["Breakfast", "Lunch", "Dinner"].includes(meal)) {
       return res
@@ -24,7 +25,7 @@ const markAttendance = async (req, res) => {
 
     // Find the serving hall
     const hall = await Hall.findById(hallId);
-    if (!hall) {
+    if (!hall || !hall.serving) {
       return res
         .status(400)
         .json({ success: false, error: "No active hall serving." });
@@ -56,13 +57,34 @@ const markAttendance = async (req, res) => {
     // Log attendance
     await Attendance.create({ studentId, messId, meal, date });
 
+    // Broadcast the updated hall capacity to all clients
+    broadcast({
+      hallId: hall._id,
+      messId: mess._id,
+      hallName: hall.name,
+      filled: hall.filled,
+      capacity: hall.capacity,
+      meal
+    });
+
     // Schedule a job to decrease the hall's `filled` count after 15 minutes
     schedule.scheduleJob(Date.now() + 15 * 60 * 1000, async () => {
       try {
         const updatedHall = await Hall.findById(hallId);
         if (updatedHall) {
-          updatedHall.filled = Math.max(0, updatedHall.filled - 1); // Ensure `filled` doesn't go below 0
+          updatedHall.filled = Math.max(0, updatedHall.filled - 1);
           await updatedHall.save();
+          
+          // Broadcast the updated capacity after reducing attendance
+          broadcast({
+            hallId: updatedHall._id,
+            messId: mess._id,
+            hallName: updatedHall.name,
+            filled: updatedHall.filled,
+            capacity: updatedHall.capacity,
+            meal,
+          });
+
           console.log(
             `Attendance decreased for hall: ${updatedHall.name} after 15 minutes.`
           );

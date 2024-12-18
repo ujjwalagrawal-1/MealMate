@@ -138,6 +138,7 @@ const isValidToken = async (req, res, next) => {
         jwtExpired: true,
       });
     const warden = await Warden.findOne({ _id: verified._id });
+    warden.password = "";
     if (!warden)
       return res.status(401).json({
         success: false,

@@ -185,9 +185,15 @@ const setMessInactive = async (req, res) => {
       return res.status(404).json({ error: "Mess not found." });
     }
 
+    // Find all halls associated with this mess and set their 'serving' status to false
+    await Hall.updateMany(
+      { messId: id },
+      { serving: false }
+    );
+
     res.status(200).json({
       success: true,
-      message: "Mess set to inactive successfully.",
+      message: "Mess set to inactive successfully, and all halls' serving status set to false.",
       mess,
     });
   } catch (err) {
@@ -195,6 +201,7 @@ const setMessInactive = async (req, res) => {
     res.status(500).json({ error: "Internal server error." });
   }
 };
+
 
 const addHallToMess = async (req, res) => {
   try {

@@ -69,6 +69,7 @@ const studentLogin = async (req, res) => {
           jwtExpired: true,
         });
       const student = await Student.findOne({ _id: verified._id });
+      student.password = "";
       if (!student)
         return res.status(401).json({
           success: false,
